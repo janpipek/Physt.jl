@@ -1,0 +1,7 @@
+name = "Physt"
+uuid = "6a44387e-0564-11e9-327a-11620ada7fbc"
+authors = ["Jan Pipek <jan.pipek@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
