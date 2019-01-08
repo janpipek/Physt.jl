@@ -1,5 +1,7 @@
 module Physt
 
+import Base.<<
+
 export h1, fill, find_bin
 
 abstract type Binning{AxisType} end
@@ -70,6 +72,8 @@ function fill(histogram::Histogram1D{AxisType, ValueType}, entry::AxisType) wher
     end
     return Histogram1D{AxisType, ValueType}(histogram.edges, new_values)
 end
+
+<<(histogram::Histogram, what_to_fill) = fill(histogram, what_to_fill)
 
 function h1(entries::AbstractArray{AxisType}, nbins::Integer=10) where AxisType
     binning = RegularBinning{AxisType}(nbins)
