@@ -21,9 +21,9 @@ end
 
 deepcopy(histogram::Histogram) = copy(histogram)
 
-function fit(binning::RegularBinning{AxisType}, entries::AbstractArray{AxisType})::Array{AxisType, 1} where AxisType
-    min = minimum(entries)
-    max = maximum(entries)
+function fit(binning::RegularBinning{AxisType}, entries::AbstractArray)::Array{AxisType, 1} where AxisType
+    min = convert(AxisType, minimum(entries))
+    max = convert(AxisType, maximum(entries))
     step = (max - min) / binning.nbins
     return collect(range(min, length=binning.nbins + 1, step=step))
 end
@@ -58,7 +58,7 @@ function transform(edges::AbstractArray{AxisType}, entries::AbstractArray{AxisTy
     return result
 end
 
-function fit_transform(binning::Binning, entries::AbstractArray{AxisType})::Tuple{Array{AxisType, 1}, Array{Int64, 1}} where AxisType
+function fit_transform(binning::Binning, entries::AbstractArray)
     edges = fit(binning, entries)
     return edges, transform(edges, entries)
 end
