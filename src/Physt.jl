@@ -1,8 +1,7 @@
 module Physt
 
-import Base.<<
-
-export h1, fill, find_bin
+import Base.<<, Base.deepcopy, Base.copy
+export h1, update, update!, find_bin
 
 abstract type Binning{AxisType} end
 abstract type Histogram end
@@ -12,9 +11,15 @@ struct RegularBinning{AxisType} <: Binning{AxisType}
 end
 
 struct Histogram1D{AxisType, ValueType} <: Histogram where AxisType
-    edges::AbstractArray{AxisType, 1}
-    values::AbstractArray{ValueType, 1}
+    edges::Array{AxisType, 1}
+    values::Array{ValueType, 1}
 end
+
+function copy(old::Histogram1D{AxisType, ValueType}) where AxisType where ValueType
+    new = Histogram1D{AxisType, ValueType}(copy(old.edges), copy(old.values))
+end
+
+deepcopy(histogram::Histogram) = copy(histogram)
 
 function fit(binning::RegularBinning{AxisType}, entries::AbstractArray{AxisType})::Array{AxisType, 1} where AxisType
     min = minimum(entries)
@@ -58,22 +63,28 @@ function fit_transform(binning::Binning, entries::AbstractArray{AxisType})::Tupl
     return edges, transform(edges, entries)
 end
 
-function fill(histogram::Histogram1D{AxisType, ValueType}, entries::AbstractArray{AxisType}) where AxisType where ValueType
-    new_values = transform(histogram.edges, entries)
-    values = histogram.values .+ new_values
-    return Histogram1D{AxisType, ValueType}(histogram.edges, values)
+function update(histogram::Histogram, any)
+    new = copy(histogram)
+    update!(new, any)
+    return new
 end
 
-function fill(histogram::Histogram1D{AxisType, ValueType}, entry::AxisType) where AxisType where ValueType
-    new_values = copy(histogram.values)
-    bin = find_bin(histogram.edges, entry)
+function update!(histogram::Histogram1D{AxisType}, entry) where AxisType
+    entry_converted = convert(AxisType, entry)
+    bin = find_bin(histogram.edges, entry_converted)
     if bin != nothing
-        new_values[bin] += 1
+        histogram.values[bin] += 1
     end
-    return Histogram1D{AxisType, ValueType}(histogram.edges, new_values)
+    return histogram
 end
 
-<<(histogram::Histogram, what_to_fill) = fill(histogram, what_to_fill)
+function update!(histogram::Histogram1D{AxisType}, entries::AbstractArray) where AxisType
+    new_values = transform(histogram.edges, entries)
+    histogram.values .+= new_values
+    return histogram
+end
+
+<<(histogram::Histogram, what_to_update) = update(histogram, what_to_update)
 
 function h1(entries::AbstractArray{AxisType}, nbins::Integer=10) where AxisType
     binning = RegularBinning{AxisType}(nbins)
