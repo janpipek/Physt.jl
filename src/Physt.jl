@@ -1,7 +1,7 @@
 module Physt
 
 import Base.<<, Base.deepcopy, Base.copy
-export h1, update, update!, find_bin
+export h1, update, update!, find_bin, 📊
 
 abstract type Binning{AxisType} end
 abstract type Histogram end
@@ -96,5 +96,7 @@ function h1(entries::AbstractArray{AxisType}, edges::AbstractArray{AxisType}) wh
     values = transform(edges, entries)
     return Histogram1D{AxisType, Int64}(edges, values)
 end
+
+📊 = h1  # Because we can...
 
 end # module
